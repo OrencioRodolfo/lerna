@@ -40,14 +40,19 @@ function getArgs(options, includeMergedTags) {
     "--always",
     // always return full result, helps identify existing release
     "--long",
-    // annotate if uncommitted changes present
-    "--dirty",
+
     // prefer tags originating on upstream branch
     "--first-parent",
   ];
 
   if (options.match) {
     args.push("--match", options.match);
+  }
+  if (options.since) {
+    args.push(options.since);
+  } else {
+    // annotate if uncommitted changes present
+    args.push("--dirty");
   }
 
   if (includeMergedTags) {
@@ -67,8 +72,10 @@ function describeRef(options = {}, includeMergedTags) {
   const promise = childProcess.exec("git", getArgs(options, includeMergedTags), options);
 
   return promise.then(({ stdout }) => {
+    console.log(stdout);
     const result = parse(stdout, options.cwd);
-
+    // console.log(options);
+    console.log("-------.......", options);
     log.verbose("git-describe", "%j => %j", options && options.match, stdout);
     log.silly("git-describe", "parsed => %j", result);
 
@@ -98,15 +105,28 @@ function describeRefSync(options = {}, includeMergedTags) {
  */
 function parse(stdout, cwd) {
   const minimalShaRegex = /^([0-9a-f]{7,40})(-dirty)?$/;
+  const tagShaRegex = /^([A-Za-z0-9\/@\-\.]+)\b(?<!\b-dirty)(\-dirty)?$/;
   // when git describe fails to locate tags, it returns only the minimal sha
+
   if (minimalShaRegex.test(stdout)) {
     // repo might still be dirty
     const [, sha, isDirty] = minimalShaRegex.exec(stdout);
+    console.log("##############", sha);
+    console.log("##############", tagShaRegex.test(stdout));
 
     // count number of commits since beginning of time
     const refCount = childProcess.execSync("git", ["rev-list", "--count", sha], { cwd });
 
     return { refCount, sha, isDirty: Boolean(isDirty) };
+  }
+  if (tagShaRegex.test(stdout)) {
+    const [, tag, , isDirty] = tagShaRegex.exec(stdout);
+    console.log("##############", stdout);
+    console.log("##############", tag);
+    console.log("##############", isDirty);
+    // count number of commits since beginning a specific tag
+    const refCount = childProcess.execSync("git", ["rev-list", "--count", tag], { cwd });
+    return { refCount, sha: stdout, isDirty: Boolean(isDirty) };
   }
 
   const [, lastTagName, lastVersion, refCount, sha, isDirty] =

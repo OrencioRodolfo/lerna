@@ -20,6 +20,13 @@ exports.builder = (yargs, composed) => {
       describe: "Amend the existing commit, instead of generating a new one.",
       type: "boolean",
     },
+    since: {
+      describe: `
+        Only include packages that have been changed since the specified [ref].
+        If no ref is passed, it defaults to the most-recent tag.
+      `,
+      type: "string",
+    },
     "conventional-commits": {
       describe: "Use conventional-changelog to determine version bump and generate CHANGELOG.",
       type: "boolean",
