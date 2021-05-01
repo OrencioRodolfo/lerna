@@ -58,7 +58,7 @@ function collectUpdates(filteredPackages, packageGraph, execOpts, commandOptions
 
     if (refCount === "0" && forced.size === 0 && !committish) {
       // no commits since previous release
-      log.notice("", "Current HEAD is already released, skipping change detection. AAAAAA.", refCount);
+      log.notice("", "Current HEAD is already released, skipping change detection.");
 
       return [];
     }

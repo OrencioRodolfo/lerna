@@ -27,7 +27,6 @@ function checkWorkingTree({ cwd, since } = {}) {
 }
 
 function throwIfReleased({ refCount }) {
-  console.log(refCount);
   if (refCount === "0") {
     throw new ValidationError(
       "ERELEASED",

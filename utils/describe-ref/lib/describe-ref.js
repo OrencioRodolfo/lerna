@@ -72,10 +72,8 @@ function describeRef(options = {}, includeMergedTags) {
   const promise = childProcess.exec("git", getArgs(options, includeMergedTags), options);
 
   return promise.then(({ stdout }) => {
-    console.log(stdout);
     const result = parse(stdout, options.cwd);
-    // console.log(options);
-    console.log("-------.......", options);
+
     log.verbose("git-describe", "%j => %j", options && options.match, stdout);
     log.silly("git-describe", "parsed => %j", result);
 
@@ -111,8 +109,6 @@ function parse(stdout, cwd) {
   if (minimalShaRegex.test(stdout)) {
     // repo might still be dirty
     const [, sha, isDirty] = minimalShaRegex.exec(stdout);
-    console.log("##############", sha);
-    console.log("##############", tagShaRegex.test(stdout));
 
     // count number of commits since beginning of time
     const refCount = childProcess.execSync("git", ["rev-list", "--count", sha], { cwd });
@@ -121,9 +117,6 @@ function parse(stdout, cwd) {
   }
   if (tagShaRegex.test(stdout)) {
     const [, tag, , isDirty] = tagShaRegex.exec(stdout);
-    console.log("##############", stdout);
-    console.log("##############", tag);
-    console.log("##############", isDirty);
     // count number of commits since beginning a specific tag
     const refCount = childProcess.execSync("git", ["rev-list", "--count", tag], { cwd });
     return { refCount, sha: stdout, isDirty: Boolean(isDirty) };
